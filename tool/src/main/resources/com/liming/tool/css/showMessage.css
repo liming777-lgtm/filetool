@@ -1,0 +1,6 @@
+.message {
+    -fx-background-color: #def2fc;
+    -fx-background-radius: 10;
+    -fx-text-fill: #909399;
+    -fx-alignment: CENTER;
+}

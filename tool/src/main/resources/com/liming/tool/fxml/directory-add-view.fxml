@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="200.0" prefWidth="379.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.liming.tool.controller.DirectoryAddController">
+   <children>
+      <Label layoutX="74.0" layoutY="56.0" text="路径:" />
+      <Label layoutX="74.0" layoutY="86.0" text="名称:" />
+      <TextField fx:id="name" layoutX="128.0" layoutY="82.0" />
+      <Button layoutX="168.0" layoutY="152.0" mnemonicParsing="false" onAction="#save" text="确定" />
+      <Label fx:id="showPath" layoutX="128.0" layoutY="56.0" prefHeight="15.0" prefWidth="157.0">
+         <tooltip>
+            <Tooltip text="文件路径" />
+         </tooltip></Label>
+      <Button layoutX="289.0" layoutY="52.0" mnemonicParsing="false" onAction="#openFile" text="选择" />
+   </children>
+</AnchorPane>
