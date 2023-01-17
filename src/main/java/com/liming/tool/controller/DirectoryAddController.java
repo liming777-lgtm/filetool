@@ -1,16 +1,18 @@
 package com.liming.tool.controller;
 
-import com.liming.tool.manager.StageManager;
+import com.liming.tool.manager.ObjectManager;
 import com.liming.tool.service.DirectoryAddService;
 import com.liming.tool.service.MainService;
+import com.liming.tool.utils.Constant;
 import com.liming.tool.utils.ShowMessageUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.Objects;
 
 public class DirectoryAddController {
 
@@ -24,11 +26,11 @@ public class DirectoryAddController {
     void save(ActionEvent event) {
         String text = name.getText();
         if ("".equals(text.trim())) {
-            ShowMessageUtil.showInfo(StageManager.getStage(MainService.MAIN_STAGE), "名字不能为空");
+            ShowMessageUtil.showInfo(Objects.requireNonNull(ObjectManager.get(Constant.MAIN_STAGE, Stage.class)), "名字不能为空");
             return;
         }
         MainService.getInstance().saveExcelPath(text, showPath.getText());
-        StageManager.getStage("directoryAdd").close();
+        Objects.requireNonNull(ObjectManager.get("directoryAdd", Stage.class)).close();
     }
 
     @FXML

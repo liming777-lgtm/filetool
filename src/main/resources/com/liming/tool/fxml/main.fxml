@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<TabPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.liming.tool.controller.MainController">
+   <tabs>
+      <Tab closable="false" text="excel工具">
+         <content>
+            <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1000.0">
+               <children>
+                  <MenuBar prefHeight="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <menus>
+                      <Menu mnemonicParsing="false" text="文件">
+                        <items>
+                          <MenuItem fx:id="addExcelPath" mnemonicParsing="false" onAction="#addExcelPath" text="添加excel路径" />
+                        </items>
+                      </Menu>
+                      <Menu mnemonicParsing="false" text="Edit">
+                        <items>
+                          <MenuItem mnemonicParsing="false" text="DeleteDeleteDeleteDeleteDelete" />
+                        </items>
+                      </Menu>
+                      <Menu mnemonicParsing="false" text="Help">
+                        <items>
+                          <MenuItem mnemonicParsing="false" text="About" />
+                        </items>
+                      </Menu>
+                    </menus>
+                  </MenuBar>
+                  <TextField fx:id="search" layoutX="341.0" layoutY="56.0" prefHeight="23.0" prefWidth="318.0" />
+                  <ChoiceBox fx:id="name" layoutX="34.0" layoutY="56.0" />
+                  <ListView fx:id="files" layoutX="341.0" layoutY="98.0" prefHeight="702.0" prefWidth="318.0" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="98.0" />
+                  <Button layoutX="810.0" layoutY="56.0" mnemonicParsing="false" onAction="#open" text="打开" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="56.0" />
+                  <Button fx:id="searchButton" layoutX="873.0" layoutY="56.0" mnemonicParsing="false" onAction="#search" text="搜索" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="56.0" />
+               </children>
+            </AnchorPane>
+         </content>
+      </Tab>
+      <Tab closable="false" text="重置工具">
+         <content>
+            <GridPane>
+              <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#navicatReset" text="navicat重置" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+               </children>
+            </GridPane>
+         </content>
+      </Tab>
+   </tabs>
+</TabPane>

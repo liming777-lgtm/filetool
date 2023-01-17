@@ -1,15 +1,10 @@
 package com.liming.tool.service;
 
-import com.liming.tool.ChoiceItem;
+import com.liming.tool.bean.ChoiceItem;
 import com.liming.tool.controller.MainController;
-import com.liming.tool.manager.StageManager;
-import com.liming.tool.utils.RunStateUtil;
-import com.liming.tool.utils.RunTimeExec;
-import com.liming.tool.utils.ShowMessageUtil;
-import com.liming.tool.utils.ThreadUtil;
+import com.liming.tool.manager.ObjectManager;
+import com.liming.tool.utils.*;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -19,6 +14,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -31,13 +27,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.*;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
 
 public class MainService {
 
@@ -51,19 +47,20 @@ public class MainService {
     }
 
     private final static MainService instance;
-    public static final String MAIN_STAGE = "mainStage";
 
     public static MainService getInstance() {
         return instance;
     }
-
-    private MainController controller;
 
     public void chooseDirectory() throws IOException {
         DirectoryAddService.getInstance().showStage();
     }
 
     public void saveExcelPath(String text, String path) {
+        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+        if (controller == null) {
+            return;
+        }
         ChoiceBox<ChoiceItem<String>> name = controller.name;
         ObservableList<ChoiceItem<String>> items = name.getItems();
         items.add(new ChoiceItem<>(text, path));
@@ -73,6 +70,10 @@ public class MainService {
 
 
     public void save() {
+        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+        if (controller == null) {
+            return;
+        }
         ObservableList<ChoiceItem<String>> items = controller.name.getItems();
         Path data = getPath();
         if (!Files.exists(data)) {
@@ -92,14 +93,17 @@ public class MainService {
     }
 
     @SuppressWarnings("unchecked")
-    public void init(MainController controller) {
-        this.controller = controller;
+    public void init() {
+        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+        if (controller == null) {
+            return;
+        }
         ChoiceBox<ChoiceItem<String>> name = controller.name;
         //数据读取 其余线程执行
         Platform.runLater(() -> {
             Path data = getPath();
             if (Files.exists(data)) {
-                try (ObjectInputStream inputStream = new ObjectInputStream(Files.newInputStream(data));) {
+                try (ObjectInputStream inputStream = new ObjectInputStream(Files.newInputStream(data))) {
                     List<ChoiceItem<String>> readObject = (List<ChoiceItem<String>>) inputStream.readObject();
                     name.setItems(FXCollections.observableList(readObject));
                     //默认选中第一个
@@ -111,12 +115,7 @@ public class MainService {
                 }
             }
         });
-        name.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<ChoiceItem<String>>() {
-            @Override
-            public void changed(ObservableValue<? extends ChoiceItem<String>> observable, ChoiceItem<String> oldValue, ChoiceItem<String> newValue) {
-                fileScan(newValue.getValue());
-            }
-        });
+        name.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> fileScan(newValue.getValue()));
         TextField search = controller.search;
         initFiles(new ArrayList<>());
         search.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
@@ -140,15 +139,14 @@ public class MainService {
     }
 
     private void initFiles(List<String> collect) {
+        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+        if (controller == null) {
+            return;
+        }
         controller.files.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         ObservableList<String> observableList = FXCollections.observableList(collect);
         FilteredList<String> strings = new FilteredList<>(observableList);
-        strings.addListener(new ListChangeListener<String>() {
-            @Override
-            public void onChanged(Change<? extends String> c) {
-                controller.files.getSelectionModel().selectFirst();
-            }
-        });
+        strings.addListener((ListChangeListener<String>) c -> controller.files.getSelectionModel().selectFirst());
         controller.files.setItems(strings);
     }
 
@@ -165,16 +163,71 @@ public class MainService {
         initFiles(collect);
     }
 
-    public void openExcel() {
-        String fileName = controller.files.getSelectionModel().getSelectedItem();
+    public void openExcel(String filesItem) {
+//        final IOReactorConfig ioReactorConfig = IOReactorConfig.custom()
+//                .setSoTimeout(Timeout.ofSeconds(3))
+//                .build();
+//
+//        final CloseableHttpAsyncClient client = HttpAsyncClients.custom()
+//                .setIOReactorConfig(ioReactorConfig)
+//                .build();
+//
+//        client.start();
+//
+//        int count = 1000;
+//        CountDownLatch countDownLatch = new CountDownLatch(count);
+//        System.out.println("开始执行");
+//        Instant now = Instant.now();
+//        for (int i = 0; i< count; i++) {
+//            final SimpleHttpRequest request = SimpleRequestBuilder.get()
+//                    .setUri("http://10.10.30.196:10011/hqg/background_api/?command=recharge&platform=1&channel=100&sid=17777&puid="+i+"&uid=260026&orderno=2301031548271002102626FB&amount=30&status=1&extinfo=2$288360372933039113$10120$504445194148291567$260026&nonce=1672732107&pfid=100&vname=1.1.0&token=62f3dc8a74ba0abf5bbfc81e6c48d657")
+//                    .build();
+//            client.execute(
+//                    SimpleRequestProducer.create(request),
+//                    SimpleResponseConsumer.create(),
+//                    new FutureCallback<SimpleHttpResponse>() {
+//
+//                        @Override
+//                        public void completed(final SimpleHttpResponse response) {
+//                            countDownLatch.countDown();
+//                        }
+//                        @Override
+//                        public void failed(final Exception ex) {
+//                            System.out.println(request + "->" + ex);
+//                            countDownLatch.countDown();
+//                        }
+//                        @Override
+//                        public void cancelled() {
+//                            System.out.println(request + " cancelled");
+//                            countDownLatch.countDown();
+//                        }
+//                    });
+//        }
+//        try {
+//            System.out.println("请求发送时间："+ ChronoUnit.SECONDS.between(now,Instant.now()));
+//            countDownLatch.await();
+//            System.out.println("全部返回时间："+ ChronoUnit.SECONDS.between(now,Instant.now()));
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        client.close(CloseMode.GRACEFUL);
+        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+        if (controller == null) {
+            return;
+        }
+        String fileName = filesItem == null ? controller.files.getSelectionModel().getSelectedItem() : filesItem;
         ChoiceItem<String> selectedItem = controller.name.getSelectionModel().getSelectedItem();
         String path = selectedItem.getValue();
-        RunTimeExec.exec(path + File.separatorChar + fileName);
-
+        RunTimeExec.openFile(path + File.separatorChar + fileName);
     }
 
 
     public void searchExcelShellAndOpen() {
+        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+        if (controller == null) {
+            return;
+        }
         String name = controller.search.getText();
         if (StringUtils.isEmpty(name.trim()) || RunStateUtil.getState(SEARCH_EXCEL_SHELL_AND_OPEN)) {
             return;
@@ -199,11 +252,18 @@ public class MainService {
                     XSSFSheet sheet = sheets.getSheet(name);
                     if (sheet != null) {
                         Platform.runLater(() -> {
+                            MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+                            if (controller == null) {
+                                return;
+                            }
                             controller.searchButton.setText("搜索");
                             controller.searchButton.setDisable(false);
-                            ShowMessageUtil.showInfo(StageManager.getStage(MAIN_STAGE), "正在打开..");
+                            Stage stage = ObjectManager.get(Constant.MAIN_STAGE, Stage.class);
+                            if (stage != null) {
+                                ShowMessageUtil.showInfo(stage, "正在打开..");
+                            }
                         });
-                        openExcel();
+                        openExcel(filesItem);
                         return;
                     }
                 } catch (IOException | InvalidFormatException e) {
@@ -212,9 +272,7 @@ public class MainService {
                     RunStateUtil.isOver(SEARCH_EXCEL_SHELL_AND_OPEN);
                 }
             }
-            Platform.runLater(() -> {
-                ShowMessageUtil.showInfo(StageManager.getStage(MAIN_STAGE), "未找到该表");
-            });
+            Platform.runLater(() -> ShowMessageUtil.showInfo(Objects.requireNonNull(ObjectManager.get(Constant.MAIN_STAGE, Stage.class)), "未找到该表"));
         }, ThreadUtil.pool);
     }
 

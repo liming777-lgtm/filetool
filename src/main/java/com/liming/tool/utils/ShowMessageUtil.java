@@ -13,11 +13,15 @@ public class ShowMessageUtil {
     private final static Popup popup = new Popup();
     private final static Label label = new Label();
 
+    private ShowMessageUtil() {
+    }
+
     static {
         ObservableList<KeyFrame> keyFrames = timeline.getKeyFrames();
         keyFrames.add(new KeyFrame(Duration.seconds(1), event -> popup.hide()));
         popup.getContent().add(label);
     }
+
     public static void showInfo(Window window, String message) {
         label.getStyleClass().add("message");
         label.setText(message);

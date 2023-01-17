@@ -1,11 +1,10 @@
 package com.liming.tool.service;
 
 import com.liming.tool.MainApplication;
-import com.liming.tool.controller.DirectoryAddController;
-import com.liming.tool.manager.StageManager;
+import com.liming.tool.manager.ObjectManager;
+import com.liming.tool.utils.Constant;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Tooltip;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -13,11 +12,8 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 
-import static com.liming.tool.service.MainService.MAIN_STAGE;
-
 public class DirectoryAddService {
 
-    public static final String DIRECTORY_ADD = "directoryAdd";
 
     static {
         instance = new DirectoryAddService();
@@ -33,7 +29,7 @@ public class DirectoryAddService {
     }
 
     public File openFile(String text) {
-        Stage stage = StageManager.getStage("directoryAdd");
+        Stage stage = ObjectManager.get(Constant.DIRECTORY_ADD, Stage.class);
         if (stage == null) {
             return null;
         }
@@ -46,17 +42,16 @@ public class DirectoryAddService {
     }
 
     public void showStage() throws IOException {
-        String name = DIRECTORY_ADD;
-        Stage directoryAdd = StageManager.getStage(name);
+        Stage directoryAdd = ObjectManager.get(Constant.DIRECTORY_ADD, Stage.class);
         if (directoryAdd == null) {
             directoryAdd = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("fxml/directory-add-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
             directoryAdd.setTitle("选择目录");
             directoryAdd.setScene(scene);
-            directoryAdd.initOwner(StageManager.getStage(MAIN_STAGE));
+            directoryAdd.initOwner(ObjectManager.get(Constant.MAIN_STAGE, Stage.class));
             directoryAdd.initModality(Modality.APPLICATION_MODAL);
-            StageManager.addStage(name, directoryAdd);
+            ObjectManager.add(Constant.DIRECTORY_ADD, directoryAdd, Stage.class);
         }
         if (directoryAdd.isShowing()) {
             return;
@@ -65,9 +60,11 @@ public class DirectoryAddService {
 
         Stage finalDirectoryAdd = directoryAdd;
         directoryAdd.setOnShown(event -> {
-            Stage stage = StageManager.getStage(MAIN_STAGE);
-            finalDirectoryAdd.setX(stage.getX() + stage.getWidth() / 2 - scene.getWidth() / 2);
-            finalDirectoryAdd.setY(stage.getY() + stage.getHeight() / 2 - scene.getHeight() / 2);
+            Stage stage = ObjectManager.get(Constant.MAIN_STAGE, Stage.class);
+            if (stage != null) {
+                finalDirectoryAdd.setX(stage.getX() + stage.getWidth() / 2 - scene.getWidth() / 2);
+                finalDirectoryAdd.setY(stage.getY() + stage.getHeight() / 2 - scene.getHeight() / 2);
+            }
         });
         directoryAdd.show();
     }

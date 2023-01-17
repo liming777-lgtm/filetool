@@ -1,4 +1,4 @@
-package com.liming.tool;
+package com.liming.tool.bean;
 
 import java.io.Serializable;
 

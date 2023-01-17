@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RunStateUtil {
+    private RunStateUtil() {
+    }
+
     private final static Map<String, Boolean> stateMap = new ConcurrentHashMap<>();
 
     public static boolean getState(String name) {
