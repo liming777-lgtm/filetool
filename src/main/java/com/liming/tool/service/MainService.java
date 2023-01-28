@@ -21,6 +21,7 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTabJc;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class MainService {
     }
 
     public void chooseDirectory() throws IOException {
-        DirectoryAddService.getInstance().showStage();
+        DirectoryAddService.getInstance().showStage(Constant.MAIN_STAGE, AddPath.EXCEL,"excel目录选择");
     }
 
     public void saveExcelPath(String text, String path) {
@@ -65,7 +66,6 @@ public class MainService {
         ObservableList<ChoiceItem<String>> items = name.getItems();
         items.add(new ChoiceItem<>(text, path));
         name.getSelectionModel().select(items.size() - 1);
-        save();
     }
 
 
@@ -74,7 +74,6 @@ public class MainService {
         if (controller == null) {
             return;
         }
-        ObservableList<ChoiceItem<String>> items = controller.name.getItems();
         Path data = getPath();
         if (!Files.exists(data)) {
             try {
@@ -83,39 +82,58 @@ public class MainService {
                 throw new RuntimeException(e);
             }
         }
+        ObservableList<ChoiceItem<String>> items = controller.name.getItems();
+        ObservableList<ChoiceItem<String>> gitPathChoiceItems = controller.GITPathChoice.getItems();
+        ObservableList<ChoiceItem<String>> svnPathChoiceItems = controller.SVNPathChoice.getItems();
 
         try (ObjectOutputStream outputStream = new ObjectOutputStream(Files.newOutputStream(data, StandardOpenOption.WRITE))) {
+            //excel
             outputStream.writeObject(new ArrayList<>(items));
             outputStream.flush();
+            //git
+            outputStream.writeObject(new ArrayList<>(gitPathChoiceItems));
+            outputStream.flush();
+            //svn
+            outputStream.writeObject(new ArrayList<>(svnPathChoiceItems));
+            outputStream.flush();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void init() {
         MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
         if (controller == null) {
             return;
         }
         ChoiceBox<ChoiceItem<String>> name = controller.name;
+        ChoiceBox<ChoiceItem<String>> gitPathChoice = controller.GITPathChoice;
+        ChoiceBox<ChoiceItem<String>> svnPathChoice = controller.SVNPathChoice;
         //数据读取 其余线程执行
         Platform.runLater(() -> {
             Path data = getPath();
             if (Files.exists(data)) {
                 try (ObjectInputStream inputStream = new ObjectInputStream(Files.newInputStream(data))) {
-                    List<ChoiceItem<String>> readObject = (List<ChoiceItem<String>>) inputStream.readObject();
-                    name.setItems(FXCollections.observableList(readObject));
-                    //默认选中第一个
-                    if (readObject.size() > 0) {
-                        name.getSelectionModel().select(0);
-                    }
+                    //excel文件路径
+                    loadDataList(name, inputStream);
+                    //git路径
+                    loadDataList(gitPathChoice, inputStream);
+                    //svn路径
+                    loadDataList(svnPathChoice, inputStream);
                 } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
+
             }
         });
-        name.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> fileScan(newValue.getValue()));
+        name.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                nullFilePath();
+                return;
+            }
+            fileScan(newValue.getValue());
+        });
         TextField search = controller.search;
         initFiles(new ArrayList<>());
         search.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
@@ -132,6 +150,39 @@ public class MainService {
                 }
             }
         });
+
+        //git操作初始化
+        ChoiceBox<ChoiceItem<String>> gitOperation = controller.GITOperation;
+        List<ChoiceItem<String>> gitList = new ArrayList<>();
+        gitList.add(new ChoiceItem<>("拉取", "TortoiseGitProc.exe /command:pull /path:\"%s"));
+        gitList.add(new ChoiceItem<>("还原", "TortoiseGitProc.exe /command:revert /path:\"%s"));
+        gitList.add(new ChoiceItem<>("提交", "TortoiseGitProc.exe /command:commit /path:\"%s"));
+        gitList.add(new ChoiceItem<>("推送", "TortoiseGitProc.exe /command:push /path:\"%s"));
+        gitList.add(new ChoiceItem<>("删除", ""));
+        gitOperation.setItems(FXCollections.observableList(gitList));
+        gitOperation.getSelectionModel().selectFirst();
+
+        //svn操作初始化
+        ChoiceBox<ChoiceItem<String>> svnOperation = controller.SVNOperation;
+        List<ChoiceItem<String>> svnList = new ArrayList<>();
+        svnList.add(new ChoiceItem<>("拉取", "TortoiseProc.exe /command:update /path:\"%s"));
+        svnList.add(new ChoiceItem<>("还原", "TortoiseProc.exe /command:revert /path:\"%s"));
+        svnList.add(new ChoiceItem<>("提交", "TortoiseProc.exe /command:commit /path:\"%s"));
+        svnList.add(new ChoiceItem<>("删除", ""));
+        svnOperation.setItems(FXCollections.observableList(svnList));
+        svnOperation.getSelectionModel().selectFirst();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadDataList(ChoiceBox<ChoiceItem<String>> name, ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+        List<ChoiceItem<String>> readObject = (List<ChoiceItem<String>>) inputStream.readObject();
+        if (readObject != null) {
+            name.setItems(FXCollections.observableList(readObject));
+            //默认选中第一个
+            if (readObject.size() > 0) {
+                name.getSelectionModel().select(0);
+            }
+        }
     }
 
     private Path getPath() {
@@ -157,61 +208,22 @@ public class MainService {
         }
         File[] listFiles = file.listFiles(pathname -> pathname.getName().endsWith(".xlsx"));
         if (listFiles == null) {
+            nullFilePath();
             return;
         }
         List<String> collect = Arrays.stream(listFiles).map(File::getName).collect(Collectors.toList());
         initFiles(collect);
     }
 
+    private void nullFilePath() {
+        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+        if (controller == null) {
+            return;
+        }
+        controller.files.setItems(new FilteredList<>(FXCollections.emptyObservableList()));
+    }
+
     public void openExcel(String filesItem) {
-//        final IOReactorConfig ioReactorConfig = IOReactorConfig.custom()
-//                .setSoTimeout(Timeout.ofSeconds(3))
-//                .build();
-//
-//        final CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-//                .setIOReactorConfig(ioReactorConfig)
-//                .build();
-//
-//        client.start();
-//
-//        int count = 1000;
-//        CountDownLatch countDownLatch = new CountDownLatch(count);
-//        System.out.println("开始执行");
-//        Instant now = Instant.now();
-//        for (int i = 0; i< count; i++) {
-//            final SimpleHttpRequest request = SimpleRequestBuilder.get()
-//                    .setUri("http://10.10.30.196:10011/hqg/background_api/?command=recharge&platform=1&channel=100&sid=17777&puid="+i+"&uid=260026&orderno=2301031548271002102626FB&amount=30&status=1&extinfo=2$288360372933039113$10120$504445194148291567$260026&nonce=1672732107&pfid=100&vname=1.1.0&token=62f3dc8a74ba0abf5bbfc81e6c48d657")
-//                    .build();
-//            client.execute(
-//                    SimpleRequestProducer.create(request),
-//                    SimpleResponseConsumer.create(),
-//                    new FutureCallback<SimpleHttpResponse>() {
-//
-//                        @Override
-//                        public void completed(final SimpleHttpResponse response) {
-//                            countDownLatch.countDown();
-//                        }
-//                        @Override
-//                        public void failed(final Exception ex) {
-//                            System.out.println(request + "->" + ex);
-//                            countDownLatch.countDown();
-//                        }
-//                        @Override
-//                        public void cancelled() {
-//                            System.out.println(request + " cancelled");
-//                            countDownLatch.countDown();
-//                        }
-//                    });
-//        }
-//        try {
-//            System.out.println("请求发送时间："+ ChronoUnit.SECONDS.between(now,Instant.now()));
-//            countDownLatch.await();
-//            System.out.println("全部返回时间："+ ChronoUnit.SECONDS.between(now,Instant.now()));
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        client.close(CloseMode.GRACEFUL);
         MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
         if (controller == null) {
             return;
@@ -276,4 +288,17 @@ public class MainService {
         }, ThreadUtil.pool);
     }
 
+    public void deleteFilePath() {
+        MainController mainController = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
+        if (mainController == null) {
+            return;
+        }
+        ChoiceBox<ChoiceItem<String>> name = mainController.name;
+        ChoiceItem<String> item = name.getSelectionModel().getSelectedItem();
+        if (item == null) {
+            return;
+        }
+        name.getItems().remove(item);
+        name.getSelectionModel().selectFirst();
+    }
 }

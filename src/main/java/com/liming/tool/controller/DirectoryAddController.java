@@ -3,6 +3,7 @@ package com.liming.tool.controller;
 import com.liming.tool.manager.ObjectManager;
 import com.liming.tool.service.DirectoryAddService;
 import com.liming.tool.service.MainService;
+import com.liming.tool.utils.AddPath;
 import com.liming.tool.utils.Constant;
 import com.liming.tool.utils.ShowMessageUtil;
 import javafx.event.ActionEvent;
@@ -29,8 +30,17 @@ public class DirectoryAddController {
             ShowMessageUtil.showInfo(Objects.requireNonNull(ObjectManager.get(Constant.MAIN_STAGE, Stage.class)), "名字不能为空");
             return;
         }
-        MainService.getInstance().saveExcelPath(text, showPath.getText());
-        Objects.requireNonNull(ObjectManager.get("directoryAdd", Stage.class)).close();
+
+        Stage stage = ObjectManager.get(Constant.DIRECTORY_ADD, Stage.class);
+        if (stage == null) {
+            return;
+        }
+        Object userData = stage.getUserData();
+        if (userData instanceof AddPath) {
+            AddPath path = (AddPath) userData;
+            path.getExecute().accept(text, showPath.getText());
+            stage.close();
+        }
     }
 
     @FXML

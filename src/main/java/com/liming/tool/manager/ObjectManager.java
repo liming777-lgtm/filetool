@@ -21,8 +21,11 @@ public class ObjectManager {
         map.remove(name);
     }
 
-    public static <T> T get(String name,Class<T> clz) {
+    public static <T> T get(String name, Class<T> clz) {
         ObjectDescription objectDescription = map.get(name);
+        if (objectDescription == null) {
+            return null;
+        }
         Object object = objectDescription.getObject();
         Class<?> clz1 = objectDescription.getClz();
         if (clz == null || !clz.equals(clz1)) {

@@ -2,6 +2,7 @@ package com.liming.tool.service;
 
 import com.liming.tool.MainApplication;
 import com.liming.tool.manager.ObjectManager;
+import com.liming.tool.utils.AddPath;
 import com.liming.tool.utils.Constant;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -41,23 +42,23 @@ public class DirectoryAddService {
         return chooser.showDialog(stage);
     }
 
-    public void showStage() throws IOException {
-        Stage directoryAdd = ObjectManager.get(Constant.DIRECTORY_ADD, Stage.class);
+    public void showStage(String name,AddPath path,String title) throws IOException {
+        Stage directoryAdd = ObjectManager.get(name, Stage.class);
         if (directoryAdd == null) {
             directoryAdd = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("fxml/directory-add-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
-            directoryAdd.setTitle("选择目录");
+            directoryAdd.setTitle(title);
             directoryAdd.setScene(scene);
             directoryAdd.initOwner(ObjectManager.get(Constant.MAIN_STAGE, Stage.class));
             directoryAdd.initModality(Modality.APPLICATION_MODAL);
-            ObjectManager.add(Constant.DIRECTORY_ADD, directoryAdd, Stage.class);
+            ObjectManager.add(name, directoryAdd, Stage.class);
         }
         if (directoryAdd.isShowing()) {
             return;
         }
         Scene scene = directoryAdd.getScene();
-
+        directoryAdd.setUserData(path);
         Stage finalDirectoryAdd = directoryAdd;
         directoryAdd.setOnShown(event -> {
             Stage stage = ObjectManager.get(Constant.MAIN_STAGE, Stage.class);

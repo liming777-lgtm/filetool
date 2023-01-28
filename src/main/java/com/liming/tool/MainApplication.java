@@ -3,7 +3,6 @@ package com.liming.tool;
 import com.liming.tool.controller.MainController;
 import com.liming.tool.manager.ObjectManager;
 import com.liming.tool.service.MainService;
-import com.liming.tool.service.ResetService;
 import com.liming.tool.utils.Constant;
 import com.liming.tool.utils.ThreadUtil;
 import javafx.application.Application;
@@ -24,11 +23,13 @@ public class MainApplication extends Application {
         stage.setTitle("工具");
         stage.setScene(scene);
         stage.show();
-        stage.setOnCloseRequest(event -> ThreadUtil.pool.shutdown());
+        stage.setOnCloseRequest(event -> {
+            ThreadUtil.pool.shutdown();
+            MainService.getInstance().save();
+        });
 
         ObjectManager.add(Constant.MAIN_STAGE, stage, Stage.class);
         ObjectManager.add(Constant.MAIN_CONTROLLER, fxmlLoader.getController(), MainController.class);
-
         MainService.getInstance().init();
     }
 
