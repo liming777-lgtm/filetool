@@ -56,7 +56,7 @@
                 </GridPane>
             </content>
         </Tab>
-        <Tab text="版本控制工具">
+        <Tab closable="false" text="版本控制工具">
             <content>
                 <AnchorPane prefHeight="200.0" prefWidth="200.0">
                     <children>
