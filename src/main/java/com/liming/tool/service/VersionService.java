@@ -26,7 +26,7 @@ public class VersionService {
         return instance;
     }
 
-    public void chooseDirectory(AddPath path) throws IOException {
+    public void chooseDirectory(AddPath path) {
         DirectoryAddService.getInstance().showStage(Constant.DIRECTORY_ADD, path, path.name() + "目录选择");
     }
 

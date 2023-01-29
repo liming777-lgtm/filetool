@@ -6,6 +6,8 @@ import com.liming.tool.utils.RunTimeExec;
 import com.liming.tool.utils.ShowMessageUtil;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +24,7 @@ public class ResetService {
     }
 
     private final static ResetService instance;
+    private final static Logger LOGGER = LoggerFactory.getLogger(ResetService.class);
 
     public static ResetService getInstance() {
         return instance;
@@ -30,6 +33,9 @@ public class ResetService {
 
     public void navicatReset() {
         Process exec = RunTimeExec.registryOperation(RunTimeExec.RegistryOperation.QUERY, "HKCU\\SOFTWARE\\Classes\\CLSID /s /f info /k");
+        if (exec == null) {
+            return;
+        }
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(exec.getInputStream()))) {
             String result;
             while ((result = reader.readLine()) != null) {
@@ -44,7 +50,7 @@ public class ResetService {
                 ShowMessageUtil.showInfo(Objects.requireNonNull(ObjectManager.get(Constant.MAIN_STAGE, Stage.class)), "重置navicat成功");
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("重置navicat失败", e);
         }
     }
 }

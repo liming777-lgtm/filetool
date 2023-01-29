@@ -12,8 +12,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.io.IOException;
-
 public class MainController {
     @FXML
     public MenuItem addExcelPath;
@@ -50,11 +48,7 @@ public class MainController {
 
     @FXML
     public void addExcelPath(ActionEvent actionEvent) {
-        try {
-            MainService.getInstance().chooseDirectory();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        MainService.getInstance().chooseDirectory();
     }
 
     @FXML
@@ -99,20 +93,11 @@ public class MainController {
     }
 
     public void addGITPath(ActionEvent actionEvent) {
-        try {
-            VersionService.getInstance().chooseDirectory(AddPath.GIT);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        VersionService.getInstance().chooseDirectory(AddPath.GIT);
     }
 
     public void addSVNPath(ActionEvent actionEvent) {
-        try {
-            VersionService.getInstance().chooseDirectory(AddPath.SVN);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        VersionService.getInstance().chooseDirectory(AddPath.SVN);
     }
 
 

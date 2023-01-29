@@ -22,6 +22,8 @@ import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTabJc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 public class MainService {
 
     public static final String SEARCH_EXCEL_SHELL_AND_OPEN = "searchExcelShellAndOpen";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainService.class);
 
     static {
         instance = new MainService();
@@ -53,8 +56,8 @@ public class MainService {
         return instance;
     }
 
-    public void chooseDirectory() throws IOException {
-        DirectoryAddService.getInstance().showStage(Constant.MAIN_STAGE, AddPath.EXCEL,"excel目录选择");
+    public void chooseDirectory() {
+        DirectoryAddService.getInstance().showStage(Constant.MAIN_STAGE, AddPath.EXCEL, "excel目录选择");
     }
 
     public void saveExcelPath(String text, String path) {
@@ -98,7 +101,7 @@ public class MainService {
             outputStream.flush();
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("数据保存出错", e);
         }
     }
 
@@ -122,7 +125,7 @@ public class MainService {
                     //svn路径
                     loadDataList(svnPathChoice, inputStream);
                 } catch (IOException | ClassNotFoundException e) {
-                    throw new RuntimeException(e);
+                    LOGGER.error("数据读取错误", e);
                 }
 
             }
@@ -279,7 +282,7 @@ public class MainService {
                         return;
                     }
                 } catch (IOException | InvalidFormatException e) {
-                    throw new RuntimeException(e);
+                    LOGGER.error("搜索表出错", e);
                 } finally {
                     RunStateUtil.isOver(SEARCH_EXCEL_SHELL_AND_OPEN);
                 }

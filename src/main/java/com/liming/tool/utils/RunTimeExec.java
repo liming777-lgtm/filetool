@@ -4,6 +4,8 @@ import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.io.IOException;
 public class RunTimeExec {
 
     private static WinUser.HHOOK hhook;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RunTimeExec.class);
 
     private RunTimeExec() {
     }
@@ -20,7 +23,6 @@ public class RunTimeExec {
      */
     public enum RegistryOperation {
         QUERY, DELETE, ADD
-
     }
 
     /**
@@ -32,17 +34,19 @@ public class RunTimeExec {
         try {
             Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + path);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("调用系统方法打开文件", e);
         }
 
     }
-    public static void exec(String cmd){
+
+    public static void exec(String cmd) {
         try {
             Runtime.getRuntime().exec(cmd);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("exec", e);
         }
     }
+
     /**
      * 对window注册表进行操作
      *
@@ -54,8 +58,9 @@ public class RunTimeExec {
         try {
             return Runtime.getRuntime().exec(String.format("REG %s %s", operation.name(), path));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("对window注册表进行操作", e);
         }
+        return null;
     }
 
     public static void keywordMonitor() {

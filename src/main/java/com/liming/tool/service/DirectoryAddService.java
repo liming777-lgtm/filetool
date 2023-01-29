@@ -9,6 +9,8 @@ import javafx.scene.Scene;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +26,7 @@ public class DirectoryAddService {
     }
 
     private final static DirectoryAddService instance;
+    private final static Logger LOGGER = LoggerFactory.getLogger(DirectoryAddService.class);
 
     public static DirectoryAddService getInstance() {
         return instance;
@@ -42,12 +45,18 @@ public class DirectoryAddService {
         return chooser.showDialog(stage);
     }
 
-    public void showStage(String name,AddPath path,String title) throws IOException {
+    public void showStage(String name, AddPath path, String title) {
         Stage directoryAdd = ObjectManager.get(name, Stage.class);
         if (directoryAdd == null) {
             directoryAdd = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("fxml/directory-add-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
+            Scene scene;
+            try {
+                scene = new Scene(fxmlLoader.load());
+            } catch (IOException e) {
+                LOGGER.error("初始化stage失败", e);
+                return;
+            }
             directoryAdd.setTitle(title);
             directoryAdd.setScene(scene);
             directoryAdd.initOwner(ObjectManager.get(Constant.MAIN_STAGE, Stage.class));
