@@ -1,9 +1,10 @@
 package com.liming.tool;
 
+import com.liming.tool.bean.StageController;
 import com.liming.tool.controller.MainController;
 import com.liming.tool.manager.ObjectManager;
 import com.liming.tool.service.MainService;
-import com.liming.tool.utils.Constant;
+import com.liming.tool.utils.HttpUtil;
 import com.liming.tool.utils.ThreadUtil;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -26,10 +27,9 @@ public class MainApplication extends Application {
         stage.setOnCloseRequest(event -> {
             ThreadUtil.pool.shutdown();
             MainService.getInstance().save();
+            HttpUtil.closeClient();
         });
-
-        ObjectManager.add(Constant.MAIN_STAGE, stage, Stage.class);
-        ObjectManager.add(Constant.MAIN_CONTROLLER, fxmlLoader.getController(), MainController.class);
+        ObjectManager.add(MainService.class.getSimpleName(), new StageController(stage, fxmlLoader.getController()), StageController.class);
         MainService.getInstance().init();
     }
 

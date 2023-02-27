@@ -1,15 +1,14 @@
 package com.liming.tool.service;
 
 import com.liming.tool.bean.ChoiceItem;
+import com.liming.tool.bean.StageController;
 import com.liming.tool.controller.MainController;
+import com.liming.tool.impl.DataInit;
 import com.liming.tool.manager.ObjectManager;
 import com.liming.tool.utils.AddPath;
-import com.liming.tool.utils.Constant;
 import com.liming.tool.utils.RunTimeExec;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ChoiceBox;
-
-import java.io.IOException;
 
 public class VersionService {
 
@@ -27,64 +26,79 @@ public class VersionService {
     }
 
     public void chooseDirectory(AddPath path) {
-        DirectoryAddService.getInstance().showStage(Constant.DIRECTORY_ADD, path, path.name() + "目录选择");
+        DirectoryAddService.getInstance().showStage(DirectoryAddService.class.getSimpleName(), path, path.name() + "目录选择");
     }
 
     public void saveGITPath(String text, String path) {
-        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
-        if (controller == null) {
+        StageController stageController = ObjectManager.get(MainService.class.getSimpleName(), StageController.class);
+        if (stageController == null) {
             return;
         }
-        ChoiceBox<ChoiceItem<String>> name = controller.GITPathChoice;
-        ObservableList<ChoiceItem<String>> items = name.getItems();
-        items.add(new ChoiceItem<>(text, path));
-        name.getSelectionModel().select(items.size() - 1);
+        DataInit dataInit = stageController.getDataInit();
+        if (dataInit instanceof MainController) {
+            MainController controller = (MainController) dataInit;
+            ChoiceBox<ChoiceItem<String>> name = controller.GITPathChoice;
+            ObservableList<ChoiceItem<String>> items = name.getItems();
+            items.add(new ChoiceItem<>(text, path));
+            name.getSelectionModel().select(items.size() - 1);
+        }
     }
 
     public void saveSVNPath(String text, String path) {
-        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
-        if (controller == null) {
+        StageController stageController = ObjectManager.get(MainService.class.getSimpleName(), StageController.class);
+        if (stageController == null) {
             return;
         }
-        ChoiceBox<ChoiceItem<String>> name = controller.SVNPathChoice;
-        ObservableList<ChoiceItem<String>> items = name.getItems();
-        items.add(new ChoiceItem<>(text, path));
-        name.getSelectionModel().select(items.size() - 1);
+        DataInit dataInit = stageController.getDataInit();
+        if (dataInit instanceof MainController) {
+            MainController controller = (MainController) dataInit;
+            ChoiceBox<ChoiceItem<String>> name = controller.SVNPathChoice;
+            ObservableList<ChoiceItem<String>> items = name.getItems();
+            items.add(new ChoiceItem<>(text, path));
+        }
     }
 
     public void SVNExecute() {
-        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
-        if (controller == null) {
+        StageController stageController = ObjectManager.get(MainService.class.getSimpleName(), StageController.class);
+        if (stageController == null) {
             return;
         }
-        ChoiceItem<String> item = controller.SVNPathChoice.getSelectionModel().getSelectedItem();
-        if (item == null) {
-            return;
+        DataInit dataInit = stageController.getDataInit();
+        if (dataInit instanceof MainController) {
+            MainController controller = (MainController) dataInit;
+            ChoiceItem<String> item = controller.SVNPathChoice.getSelectionModel().getSelectedItem();
+            if (item == null) {
+                return;
+            }
+            ChoiceItem<String> selectedItem = controller.SVNOperation.getSelectionModel().getSelectedItem();
+            if ("删除".equals(selectedItem.getName())) {
+                controller.SVNPathChoice.getItems().remove(item);
+                return;
+            }
+            String cmdBase = selectedItem.getValue();
+            RunTimeExec.exec(String.format(cmdBase, item.getValue()));
         }
-        ChoiceItem<String> selectedItem = controller.SVNOperation.getSelectionModel().getSelectedItem();
-        if ("删除".equals(selectedItem.getName())) {
-            controller.SVNPathChoice.getItems().remove(item);
-            return;
-        }
-        String cmdBase = selectedItem.getValue();
-        RunTimeExec.exec(String.format(cmdBase, item.getValue()));
     }
 
     public void GITExecute() {
-        MainController controller = ObjectManager.get(Constant.MAIN_CONTROLLER, MainController.class);
-        if (controller == null) {
+        StageController stageController = ObjectManager.get(MainService.class.getSimpleName(), StageController.class);
+        if (stageController == null) {
             return;
         }
-        ChoiceItem<String> item = controller.GITPathChoice.getSelectionModel().getSelectedItem();
-        if (item == null) {
-            return;
+        DataInit dataInit = stageController.getDataInit();
+        if (dataInit instanceof MainController) {
+            MainController controller = (MainController) dataInit;
+            ChoiceItem<String> item = controller.GITPathChoice.getSelectionModel().getSelectedItem();
+            if (item == null) {
+                return;
+            }
+            ChoiceItem<String> selectedItem = controller.GITOperation.getSelectionModel().getSelectedItem();
+            if ("删除".equals(selectedItem.getName())) {
+                controller.GITPathChoice.getItems().remove(item);
+                return;
+            }
+            String cmdBase = selectedItem.getValue();
+            RunTimeExec.exec(String.format(cmdBase, item.getValue()));
         }
-        ChoiceItem<String> selectedItem = controller.GITOperation.getSelectionModel().getSelectedItem();
-        if ("删除".equals(selectedItem.getName())) {
-            controller.GITPathChoice.getItems().remove(item);
-            return;
-        }
-        String cmdBase = selectedItem.getValue();
-        RunTimeExec.exec(String.format(cmdBase, item.getValue()));
     }
 }

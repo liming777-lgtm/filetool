@@ -1,7 +1,6 @@
 package com.liming.tool.service;
 
 import com.liming.tool.manager.ObjectManager;
-import com.liming.tool.utils.Constant;
 import com.liming.tool.utils.RunTimeExec;
 import com.liming.tool.utils.ShowMessageUtil;
 import javafx.stage.Stage;
@@ -47,7 +46,7 @@ public class ResetService {
                 RunTimeExec.registryOperation(RunTimeExec.RegistryOperation.DELETE, result + " /f");
                 RunTimeExec.registryOperation(RunTimeExec.RegistryOperation.DELETE, "HKEY_CURRENT_USER\\Software\\PremiumSoft\\NavicatPremium\\Registration16XCS" + " /f");
                 RunTimeExec.registryOperation(RunTimeExec.RegistryOperation.DELETE, "HKEY_CURRENT_USER\\Software\\PremiumSoft\\NavicatPremium\\Update" + " /f");
-                ShowMessageUtil.showInfo(Objects.requireNonNull(ObjectManager.get(Constant.MAIN_STAGE, Stage.class)), "重置navicat成功");
+                ShowMessageUtil.showInfo(null, "重置navicat成功");
             }
         } catch (IOException e) {
             LOGGER.error("重置navicat失败", e);

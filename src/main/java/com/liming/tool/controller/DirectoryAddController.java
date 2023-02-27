@@ -1,21 +1,19 @@
 package com.liming.tool.controller;
 
+import com.liming.tool.bean.StageController;
+import com.liming.tool.impl.DataInit;
 import com.liming.tool.manager.ObjectManager;
 import com.liming.tool.service.DirectoryAddService;
-import com.liming.tool.service.MainService;
 import com.liming.tool.utils.AddPath;
-import com.liming.tool.utils.Constant;
 import com.liming.tool.utils.ShowMessageUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
 import java.io.File;
-import java.util.Objects;
 
-public class DirectoryAddController {
+public class DirectoryAddController implements DataInit {
 
     @FXML
     public TextField name;
@@ -23,24 +21,29 @@ public class DirectoryAddController {
     @FXML
     public Label showPath;
 
+    private AddPath addPath;
+
+    @Override
+    public void init(Object obj) {
+        if (obj instanceof AddPath) {
+            this.addPath = (AddPath) obj;
+        }
+    }
+
     @FXML
     void save(ActionEvent event) {
         String text = name.getText();
         if ("".equals(text.trim())) {
-            ShowMessageUtil.showInfo(Objects.requireNonNull(ObjectManager.get(Constant.MAIN_STAGE, Stage.class)), "名字不能为空");
+            ShowMessageUtil.showInfo(null, "名字不能为空");
             return;
         }
 
-        Stage stage = ObjectManager.get(Constant.DIRECTORY_ADD, Stage.class);
-        if (stage == null) {
+        StageController stageController = ObjectManager.get(DirectoryAddService.class.getSimpleName(), StageController.class);
+        if (stageController == null) {
             return;
         }
-        Object userData = stage.getUserData();
-        if (userData instanceof AddPath) {
-            AddPath path = (AddPath) userData;
-            path.getExecute().accept(text, showPath.getText());
-            stage.close();
-        }
+        addPath.getExecute().accept(text, showPath.getText());
+        stageController.getStage().close();
     }
 
     @FXML
