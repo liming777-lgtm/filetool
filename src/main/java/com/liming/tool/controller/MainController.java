@@ -17,11 +17,9 @@ import com.liming.tool.utils.ShowMessageUtil;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

@@ -8,7 +8,6 @@ import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.stage.Popup;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Duration;
 

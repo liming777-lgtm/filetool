@@ -21,7 +21,7 @@ import java.io.IOException;
 public class HttpUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
 
-    public static final String BASE_URL = "http://*****";
+    public static final String BASE_URL = "http://liming777.xyz:8080";
 
     private HttpUtil() {
     }
@@ -48,7 +48,7 @@ public class HttpUtil {
     }
 
     public static String request(JSONObject json, HttpUriRequestBase httpMethod) {
-        httpMethod.addHeader("userInfo","****");
+        httpMethod.addHeader("userInfo","9YY46z3jfQ371ZQ9");
         if (json != null) {
             httpMethod.setEntity(new StringEntity(json.toString(), ContentType.APPLICATION_JSON));
         }
